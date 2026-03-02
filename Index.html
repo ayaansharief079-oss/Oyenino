@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>na trendzzz</title>
+
+<style>
+    body { 
+        margin:0; 
+        font-family: Arial, sans-serif; 
+        background:#f7f7f7; 
+    }
+
+    h2 {
+        padding-left:15px;
+    }
+
+    /* HERO */
+    .hero {
+        background:url("https://images.unsplash.com/photo-1542834369-f10ebf06d3cb") center/cover no-repeat;
+        width:100%; 
+        height:350px;
+        display:flex; 
+        flex-direction:column; 
+        justify-content:center; 
+        align-items:center;
+        color:white; 
+        text-shadow:0 0 10px black;
+        text-align:center; 
+        padding:20px;
+    }
+    .hero h1 { 
+        font-size:36px; 
+        margin:0; 
+        letter-spacing:2px;
+    }
+    .hero p { 
+        margin-top:10px; 
+        font-size:18px; 
+    }
+    .hero button {
+        margin-top:20px; 
+        padding:12px 25px; 
+        font-size:16px;
+        background:#ff6b00; 
+        border:none; 
+        color:white; 
+        border-radius:5px;
+        cursor:pointer;
+    }
+    .hero button:hover {
+        background:#e65c00;
+    }
+
+    /* PRODUCT CAROUSEL */
+    .carousel {
+        display:flex; 
+        overflow-x:auto; 
+        gap:15px; 
+        padding:20px;
+        scroll-behavior:smooth;
+    }
+    .carousel::-webkit-scrollbar { display:none; }
+
+    .product {
+        min-width:200px; 
+        background:white; 
+        border-radius:8px; 
+        padding:10px;
+        box-shadow:0 2px 10px rgba(0,0,0,0.1);
+        transition:0.3s;
+    }
+
+    .product:hover {
+        transform:translateY(-5px);
+    }
+
+    .product img { 
+        width:100%; 
+        border-radius:8px; 
+    }
+    .product h3 { 
+        margin:10px 0 5px; 
+    }
+
+    .product button {
+        background:#007bff; 
+        color:white; 
+        border:none; 
+        width:100%;
+        padding:10px; 
+        border-radius:5px; 
+        margin-top:10px;
+        cursor:pointer;
+    }
+
+    .product button:hover {
+        background:#0056b3;
+    }
+
+    /* CART FORM */
+    #cartForm {
+        padding:20px;
+        background:white;
+        margin:20px;
+        border-radius:8px;
+        box-shadow:0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    input {
+        width:100%;
+        padding:10px;
+        margin-top:10px;
+        border-radius:5px;
+        border:1px solid #ccc;
+    }
+
+    #cart-list {
+        margin:10px 0;
+        padding-left:20px;
+    }
+
+    /* ORDER BUTTON */
+    .order-btn {
+        background:green;
+        color:white;
+        padding:12px;
+        border:none;
+        width:100%;
+        margin-top:15px;
+        border-radius:5px;
+        cursor:pointer;
+    }
+
+    .order-btn:hover {
+        background:darkgreen;
+    }
+
+    /* WHATSAPP FLOAT BUTTON */
+    .whatsapp {
+        position:fixed; 
+        bottom:20px; 
+        right:20px;
+        width:60px; 
+        height:60px; 
+        background:#25D366; 
+        border-radius:50%;
+        display:flex; 
+        justify-content:center; 
+        align-items:center;
+        color:white; 
+        font-size:30px; 
+        text-decoration:none;
+        box-shadow:0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .whatsapp:hover {
+        transform:scale(1.1);
+        transition:0.3s;
+    }
+</style>
+
+</head>
+<body>
+
+<!-- HERO SECTION -->
+<div class="hero">
+    <h1>na trendzzz</h1>
+    <p>Fresh finds, best prices</p>
+    <button onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">
+        Shop Now
+    </button>
+</div>
+
+<!-- PRODUCTS -->
+<h2>Products</h2>
+
+<div class="carousel" id="products">
+    <div class="product">
+        <img src="https://i.ibb.co/nsmXWfYb" alt="">
+        <h3>Trendy Wear</h3>
+        <p>Price: ₹499</p>
+        <button onclick="addToCart('Trendy Wear', 499)">Add to Cart</button>
+    </div>
+
+    <div class="product">
+        <img src="https://i.ibb.co/nsmXWfYb" alt="">
+        <h3>Fashion Tee</h3>
+        <p>Price: ₹399</p>
+        <button onclick="addToCart('Fashion Tee', 399)">Add to Cart</button>
+    </div>
+
+    <div class="product">
+        <img src="https://i.ibb.co/nsmXWfYb" alt="">
+        <h3>Classic Shirt</h3>
+        <p>Price: ₹599</p>
+        <button onclick="addToCart('Classic Shirt', 599)">Add to Cart</button>
+    </div>
+</div>
+
+<!-- CART FORM -->
+<div id="cartForm">
+    <h2>Your Order</h2>
+
+    <div id="cart-list">
+        <p>No items added yet.</p>
+    </div>
+
+    <h3>Customer Details</h3>
+    <input id="custName" placeholder="Your Name">
+    <input id="phone" placeholder="Phone Number">
+
+    <button class="order-btn" onclick="sendEmail()">Place Order</button>
+</div>
+
+<!-- WHATSAPP BUTTON -->
+<a href="https://wa.me/9999999999" class="whatsapp">💬</a>
+
+<script>
+    let cart = [];
+
+    function addToCart(name, price) {
+        cart.push({name, price});
+        updateCartDisplay();
+    }
+
+    function updateCartDisplay() {
+        const list = document.getElementById("cart-list");
+
+        if (cart.length === 0) {
+            list.innerHTML = "<p>No items added yet.</p>";
+            return;
+        }
+
+        let total = cart.reduce((sum, item) => sum + item.price, 0);
+
+        list.innerHTML = "<ul>" + 
+            cart.map(item => `<li>${item.name} - ₹${item.price}</li>`).join("") +
+            `</ul><strong>Total: ₹${total}</strong>`;
+    }
+
+    function sendEmail() {
+        const name = document.getElementById("custName").value;
+        const phone = document.getElementById("phone").value;
+
+        if (!name || !phone || cart.length === 0) {
+            alert("Please enter all details and add items to cart.");
+            return;
+        }
+
+        const itemList = cart.map(i => `${i.name} - ₹${i.price}`).join("\n");
+        
+        const email = "ayaansharief079@gmail.com";
+        const subject = "New Order Request";
+        const body = 
+`Customer Name: ${name}
+Phone: ${phone}
+
+Items:
+${itemList}`;
+
+        window.location.href = 
+`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+</script>
+
+</body>
+  </html>
