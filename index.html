@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Na Trendzzz</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+font-family:'Poppins',sans-serif;
+background:#f7f7f7;
+color:#333;
+}
+
+header{
+background:#0a2540;
+color:#fff;
+padding:20px;
+text-align:center;
+}
+
+header h1{
+font-size:26px;
+}
+
+header p{
+opacity:.8;
+}
+
+.filters{
+display:flex;
+gap:10px;
+overflow-x:auto;
+padding:15px;
+background:#fff;
+position:sticky;
+top:0;
+z-index:5;
+}
+
+.filters button{
+border:none;
+padding:8px 16px;
+background:#eee;
+border-radius:20px;
+cursor:pointer;
+}
+
+.filters button.active{
+background:#0a2540;
+color:#fff;
+}
+
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+gap:15px;
+padding:15px;
+}
+
+.product{
+background:#fff;
+border-radius:10px;
+padding:10px;
+box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+.product img{
+width:100%;
+border-radius:8px;
+}
+
+.product h3{
+font-size:14px;
+margin:5px 0;
+}
+
+.price{
+font-weight:600;
+color:#0a2540;
+}
+
+.product button{
+margin-top:8px;
+width:100%;
+border:none;
+background:#0a2540;
+color:#fff;
+padding:8px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.cart-btn{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#0a2540;
+color:#fff;
+border-radius:50%;
+width:60px;
+height:60px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:22px;
+cursor:pointer;
+}
+
+.cart-count{
+position:absolute;
+top:-5px;
+right:-5px;
+background:red;
+color:#fff;
+font-size:12px;
+padding:3px 7px;
+border-radius:50%;
+}
+
+.cart-modal{
+position:fixed;
+top:0;
+right:-100%;
+width:100%;
+max-width:400px;
+height:100%;
+background:#fff;
+box-shadow:-3px 0 10px rgba(0,0,0,.2);
+transition:.3s;
+display:flex;
+flex-direction:column;
+}
+
+.cart-modal.active{
+right:0;
+}
+
+.cart-items{
+flex:1;
+overflow:auto;
+padding:20px;
+}
+
+.cart-item{
+display:flex;
+justify-content:space-between;
+margin-bottom:10px;
+}
+
+.qty{
+display:flex;
+gap:5px;
+}
+
+.qty button{
+width:25px;
+}
+
+.total{
+padding:20px;
+border-top:1px solid #ddd;
+}
+
+.checkout-btn{
+width:100%;
+padding:12px;
+background:#25D366;
+border:none;
+color:#fff;
+font-size:16px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.checkout{
+display:none;
+padding:20px;
+}
+
+.checkout input,
+.checkout textarea{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:1px solid #ddd;
+border-radius:6px;
+}
+
+.whatsapp{
+position:fixed;
+left:20px;
+bottom:20px;
+background:#25D366;
+color:#fff;
+padding:12px 15px;
+border-radius:30px;
+text-decoration:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Na Trendzzz</h1>
+<p>Stylish fashion delivered to your door</p>
+</header>
+
+<div class="filters">
+<button onclick="filter('all')" class="active">All</button>
+<button onclick="filter('Fashion')">Fashion</button>
+<button onclick="filter('Shoes')">Shoes</button>
+<button onclick="filter('Accessories')">Accessories</button>
+</div>
+
+<div class="products" id="products"></div>
+
+<div class="cart-btn" onclick="toggleCart()">
+🛒
+<span class="cart-count" id="cartCount">0</span>
+</div>
+
+<div class="cart-modal" id="cartModal">
+
+<div class="cart-items" id="cartItems"></div>
+
+<div class="total">
+<h3>Total ₹<span id="cartTotal">0</span></h3>
+<button class="checkout-btn" onclick="showCheckout()">Place Order</button>
+</div>
+
+</div>
+
+<div class="checkout" id="checkout">
+
+<form id="orderForm" action="https://formspree.io/f/FORM_ID" method="POST">
+
+<input required placeholder="Your Name" name="name">
+<input required placeholder="Phone Number" name="phone">
+<textarea required placeholder="Delivery Address" name="address"></textarea>
+<textarea placeholder="Instructions" name="instructions"></textarea>
+
+<input type="hidden" name="order" id="orderSummary">
+
+<button class="checkout-btn">Submit Order</button>
+
+</form>
+
+</div>
+
+<a class="whatsapp" href="https://wa.me/919999999999" target="_blank">WhatsApp</a>
+
+<script>
+
+const products=[
+
+{name:"Men Round Neck T Shirt",price:399,cat:"Fashion",img:"https://i.ibb.co/B3s7V4b/tshirt.jpg",desc:"Comfort cotton tshirt"},
+
+{name:"Casual Shirt",price:599,cat:"Fashion",img:"https://i.ibb.co/3k4JH5G/shirt.jpg",desc:"Stylish casual shirt"},
+
+{name:"Running Shoes",price:1299,cat:"Shoes",img:"https://i.ibb.co/4VtG5bC/shoes.jpg",desc:"Lightweight running shoes"},
+
+{name:"Sneakers",price:1499,cat:"Shoes",img:"https://i.ibb.co/hBfP6W3/sneaker.jpg",desc:"Trendy street sneakers"},
+
+{name:"Cap",price:199,cat:"Accessories",img:"https://i.ibb.co/0Zp6Q5H/cap.jpg",desc:"Adjustable cotton cap"},
+
+{name:"Sunglasses",price:299,cat:"Accessories",img:"https://i.ibb.co/jZV7mHT/glasses.jpg",desc:"UV protection glasses"},
+
+{name:"Jeans",price:899,cat:"Fashion",img:"https://i.ibb.co/kD0P0r3/jeans.jpg",desc:"Slim fit denim"},
+
+{name:"Sandals",price:699,cat:"Shoes",img:"https://i.ibb.co/VqN9tY9/sandal.jpg",desc:"Comfort daily sandals"}
+
+]
+
+let cart=JSON.parse(localStorage.getItem("cart"))||[]
+
+function renderProducts(list){
+const container=document.getElementById("products")
+container.innerHTML=""
+list.forEach((p,i)=>{
+container.innerHTML+=`
+<div class="product">
+<img loading="lazy" src="${p.img}" alt="${p.name}">
+<h3>${p.name}</h3>
+<div class="price">₹${p.price}</div>
+<button onclick="addCart(${i})">Add to Cart</button>
+</div>`
+})
+}
+
+renderProducts(products)
+
+function filter(cat){
+document.querySelectorAll(".filters button").forEach(b=>b.classList.remove("active"))
+event.target.classList.add("active")
+
+if(cat==="all") renderProducts(products)
+else renderProducts(products.filter(p=>p.cat===cat))
+}
+
+function addCart(i){
+const item=products[i]
+const exist=cart.find(c=>c.name===item.name)
+
+if(exist) exist.qty++
+else cart.push({...item,qty:1})
+
+saveCart()
+}
+
+function saveCart(){
+localStorage.setItem("cart",JSON.stringify(cart))
+updateCart()
+}
+
+function updateCart(){
+document.getElementById("cartCount").innerText=cart.reduce((a,b)=>a+b.qty,0)
+
+let items=""
+let total=0
+
+cart.forEach((c,i)=>{
+total+=c.price*c.qty
+
+items+=`
+<div class="cart-item">
+<div>
+${c.name}<br>
+₹${c.price} x ${c.qty}
+</div>
+
+<div class="qty">
+<button onclick="changeQty(${i},-1)">-</button>
+<button onclick="changeQty(${i},1)">+</button>
+<button onclick="removeItem(${i})">x</button>
+</div>
+</div>`
+})
+
+document.getElementById("cartItems").innerHTML=items
+document.getElementById("cartTotal").innerText=total
+}
+
+function changeQty(i,d){
+cart[i].qty+=d
+if(cart[i].qty<=0) cart.splice(i,1)
+saveCart()
+}
+
+function removeItem(i){
+cart.splice(i,1)
+saveCart()
+}
+
+function toggleCart(){
+document.getElementById("cartModal").classList.toggle("active")
+updateCart()
+}
+
+function showCheckout(){
+document.getElementById("checkout").style.display="block"
+toggleCart()
+
+let summary=""
+
+cart.forEach(c=>{
+summary+=`${c.name} x${c.qty} - ₹${c.price*c.qty}\n`
+})
+
+summary+="\nTotal: ₹"+document.getElementById("cartTotal").innerText
+
+document.getElementById("orderSummary").value=summary
+}
+
+document.getElementById("orderForm").addEventListener("submit",()=>{
+localStorage.removeItem("cart")
+alert("Order placed! We will contact you soon on WhatsApp.")
+})
+
+updateCart()
+
+</script>
+
+</body>
+</html>
