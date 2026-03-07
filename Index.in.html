@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Olympic Mart Supermarket</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+font-family:Poppins,sans-serif;
+background:#f5f6fa;
+color:#333;
+}
+
+header{
+background:#1f3c88;
+color:#fff;
+padding:20px;
+text-align:center;
+}
+
+header h1{font-size:24px}
+
+header p{opacity:.9;font-size:14px}
+
+.filters{
+display:flex;
+gap:10px;
+overflow-x:auto;
+padding:12px;
+background:#fff;
+position:sticky;
+top:0;
+z-index:5;
+}
+
+.filters button{
+border:none;
+padding:8px 14px;
+border-radius:20px;
+background:#eee;
+cursor:pointer;
+font-size:13px;
+}
+
+.filters button.active{
+background:#1f3c88;
+color:#fff;
+}
+
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+gap:15px;
+padding:15px;
+}
+
+.product{
+background:#fff;
+border-radius:10px;
+padding:10px;
+box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+
+.product img{
+width:100%;
+border-radius:8px;
+}
+
+.product h3{
+font-size:14px;
+margin:6px 0;
+}
+
+.price{
+font-weight:600;
+color:#1f3c88;
+}
+
+.product p{
+font-size:12px;
+opacity:.7;
+}
+
+.product button{
+margin-top:8px;
+width:100%;
+border:none;
+background:#1f3c88;
+color:#fff;
+padding:8px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.cart-btn{
+position:fixed;
+right:20px;
+bottom:20px;
+background:#1f3c88;
+color:#fff;
+width:60px;
+height:60px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:22px;
+cursor:pointer;
+}
+
+.cart-count{
+position:absolute;
+top:-5px;
+right:-5px;
+background:red;
+color:#fff;
+font-size:11px;
+padding:3px 6px;
+border-radius:50%;
+}
+
+.cart-modal{
+position:fixed;
+top:0;
+right:-100%;
+width:100%;
+max-width:400px;
+height:100%;
+background:#fff;
+box-shadow:-3px 0 12px rgba(0,0,0,.2);
+transition:.3s;
+display:flex;
+flex-direction:column;
+}
+
+.cart-modal.active{
+right:0;
+}
+
+.cart-items{
+flex:1;
+overflow:auto;
+padding:20px;
+}
+
+.cart-item{
+display:flex;
+justify-content:space-between;
+margin-bottom:10px;
+font-size:14px;
+}
+
+.qty{
+display:flex;
+gap:5px;
+}
+
+.qty button{
+width:25px;
+border:none;
+background:#eee;
+cursor:pointer;
+}
+
+.total{
+padding:20px;
+border-top:1px solid #ddd;
+}
+
+.checkout-btn{
+width:100%;
+padding:12px;
+background:#25D366;
+border:none;
+color:#fff;
+border-radius:6px;
+font-size:15px;
+cursor:pointer;
+}
+
+.checkout{
+display:none;
+padding:20px;
+}
+
+.checkout input,
+.checkout textarea{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:1px solid #ddd;
+border-radius:6px;
+}
+
+.whatsapp{
+position:fixed;
+left:20px;
+bottom:20px;
+background:#25D366;
+color:#fff;
+padding:12px 16px;
+border-radius:30px;
+text-decoration:none;
+font-size:14px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Olympic Mart Supermarket</h1>
+<p>Fresh groceries & daily essentials delivered in Kodambakkam</p>
+</header>
+
+<div class="filters">
+<button onclick="filter('all')" class="active">All</button>
+<button onclick="filter('Groceries')">Groceries</button>
+<button onclick="filter('Dairy')">Dairy</button>
+<button onclick="filter('Snacks')">Snacks</button>
+<button onclick="filter('Beverages')">Beverages</button>
+</div>
+
+<div class="products" id="products"></div>
+
+<div class="cart-btn" onclick="toggleCart()">
+🛒
+<span class="cart-count" id="cartCount">0</span>
+</div>
+
+<div class="cart-modal" id="cartModal">
+
+<div class="cart-items" id="cartItems"></div>
+
+<div class="total">
+<h3>Total ₹<span id="cartTotal">0</span></h3>
+<button class="checkout-btn" onclick="showCheckout()">Place Order</button>
+</div>
+
+</div>
+
+<div class="checkout" id="checkout">
+
+<form id="orderForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+
+<input required name="name" placeholder="Customer Name">
+<input required name="phone" placeholder="Phone Number">
+<textarea required name="address" placeholder="Delivery Address"></textarea>
+<textarea name="instructions" placeholder="Special Instructions"></textarea>
+
+<input type="hidden" name="order" id="orderSummary">
+
+<button class="checkout-btn">Submit Order</button>
+
+</form>
+
+</div>
+
+<a class="whatsapp" href="https://wa.me/914442322089" target="_blank">
+Chat on WhatsApp
+</a>
+
+<script>
+
+const products=[
+
+{name:"Aashirvaad Atta 5kg",price:280,cat:"Groceries",img:"https://i.ibb.co/7Y8z0pF/atta.jpg",desc:"Premium whole wheat flour"},
+
+{name:"India Gate Basmati Rice 5kg",price:650,cat:"Groceries",img:"https://i.ibb.co/VJ4F1QY/rice.jpg",desc:"Long grain basmati rice"},
+
+{name:"Amul Butter 500g",price:280,cat:"Dairy",img:"https://i.ibb.co/2nYgKXb/butter.jpg",desc:"Fresh salted butter"},
+
+{name:"Amul Milk 1L",price:65,cat:"Dairy",img:"https://i.ibb.co/0VvT7h0/milk.jpg",desc:"Fresh full cream milk"},
+
+{name:"Maggi Noodles Pack",price:14,cat:"Snacks",img:"https://i.ibb.co/9HhS6Vr/maggi.jpg",desc:"Instant noodles"},
+
+{name:"Lays Classic Chips",price:20,cat:"Snacks",img:"https://i.ibb.co/pLxY9C2/lays.jpg",desc:"Crispy salted chips"},
+
+{name:"Coca Cola 750ml",price:40,cat:"Beverages",img:"https://i.ibb.co/Wg5FQ1T/coke.jpg",desc:"Refreshing soft drink"},
+
+{name:"Tata Tea Gold 500g",price:260,cat:"Groceries",img:"https://i.ibb.co/Tkksq0P/tea.jpg",desc:"Premium tea leaves"}
+
+]
+
+let cart=JSON.parse(localStorage.getItem("cart"))||[]
+
+function renderProducts(list){
+
+const container=document.getElementById("products")
+container.innerHTML=""
+
+list.forEach((p,i)=>{
+
+container.innerHTML+=`
+
+<div class="product">
+
+<img loading="lazy" src="${p.img}" alt="${p.name}">
+
+<h3>${p.name}</h3>
+
+<p>${p.desc}</p>
+
+<div class="price">₹${p.price}</div>
+
+<button onclick="addCart(${i})">Add to Cart</button>
+
+</div>
+
+`
+
+})
+
+}
+
+renderProducts(products)
+
+function filter(cat){
+
+document.querySelectorAll(".filters button").forEach(b=>b.classList.remove("active"))
+event.target.classList.add("active")
+
+if(cat==="all") renderProducts(products)
+else renderProducts(products.filter(p=>p.cat===cat))
+
+}
+
+function addCart(i){
+
+const item=products[i]
+
+const exist=cart.find(c=>c.name===item.name)
+
+if(exist) exist.qty++
+else cart.push({...item,qty:1})
+
+saveCart()
+
+}
+
+function saveCart(){
+
+localStorage.setItem("cart",JSON.stringify(cart))
+updateCart()
+
+}
+
+function updateCart(){
+
+document.getElementById("cartCount").innerText=cart.reduce((a,b)=>a+b.qty,0)
+
+let items=""
+let total=0
+
+cart.forEach((c,i)=>{
+
+total+=c.price*c.qty
+
+items+=`
+
+<div class="cart-item">
+
+<div>
+
+${c.name}<br>
+
+₹${c.price} x ${c.qty}
+
+</div>
+
+<div class="qty">
+
+<button onclick="changeQty(${i},-1)">-</button>
+
+<button onclick="changeQty(${i},1)">+</button>
+
+<button onclick="removeItem(${i})">x</button>
+
+</div>
+
+</div>
+
+`
+
+})
+
+document.getElementById("cartItems").innerHTML=items
+document.getElementById("cartTotal").innerText=total
+
+}
+
+function changeQty(i,d){
+
+cart[i].qty+=d
+
+if(cart[i].qty<=0) cart.splice(i,1)
+
+saveCart()
+
+}
+
+function removeItem(i){
+
+cart.splice(i,1)
+saveCart()
+
+}
+
+function toggleCart(){
+
+document.getElementById("cartModal").classList.toggle("active")
+updateCart()
+
+}
+
+function showCheckout(){
+
+document.getElementById("checkout").style.display="block"
+
+toggleCart()
+
+let summary=""
+
+cart.forEach(c=>{
+
+summary+=`${c.name} x${c.qty} - ₹${c.price*c.qty}\n`
+
+})
+
+summary+="\nTotal: ₹"+document.getElementById("cartTotal").innerText
+
+document.getElementById("orderSummary").value=summary
+
+}
+
+document.getElementById("orderForm").addEventListener("submit",()=>{
+
+localStorage.removeItem("cart")
+
+alert("Order placed! Olympic Mart Supermarket will contact you to confirm.")
+
+})
+
+updateCart()
+
+</script>
+
+</body>
+</html>
